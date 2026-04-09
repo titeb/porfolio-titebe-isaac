@@ -185,65 +185,78 @@ export default function ProjectsPanel() {
 
       {/* ── Mobile/tablet: carousel (2 per slide, stacked vertically) ── */}
       <div className="md:hidden mb-6">
-        <div ref={emblaRef} className="overflow-hidden">
-          <div className="flex gap-3">
-            {projectPairs.map((pair, slideIdx) => (
-              <div
-                key={slideIdx}
-                className="flex-[0_0_100%] min-w-0 pl-0"
-              >
-                <div className="flex flex-col gap-3">
-                  {pair.map((project, cardIdx) => (
-                    <ProjectCard
-                      key={project.title}
-                      project={project}
-                      index={slideIdx * 2 + cardIdx}
-                      isInView={isInView}
-                    />
-                  ))}
+        <div className="relative">
+          {/* Carousel container */}
+          <div ref={emblaRef} className="overflow-visible">
+            <div className="flex gap-3 overflow-hidden">
+              {projectPairs.map((pair, slideIdx) => (
+                <div
+                  key={slideIdx}
+                  className="flex-[0_0_100%] min-w-0"
+                >
+                  <div className="flex flex-col gap-3">
+                    {pair.map((project, cardIdx) => (
+                      <ProjectCard
+                        key={project.title}
+                        project={project}
+                        index={slideIdx * 2 + cardIdx}
+                        isInView={isInView}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
+          {/* Overlaid arrows – always visible, centered vertically */}
+          {projectPairs.length > 1 && (
+            <>
+              {/* Left arrow */}
+              <button
+                onClick={scrollPrev}
+                disabled={!canScrollPrev}
+                aria-label="Slide précédent"
+                className={cn(
+                  "absolute left-0 top-1/2 -translate-y-1/2 z-10",
+                  "w-9 h-9 rounded-full flex items-center justify-center",
+                  "transition-all duration-200 ease-out",
+                  "border backdrop-blur-sm shadow-lg",
+                  canScrollPrev
+                    ? "bg-black/40 hover:bg-orange/80 border-white/10 hover:border-orange text-white/80 hover:text-white active:scale-90 cursor-pointer"
+                    : "bg-black/20 border-transparent text-white/10 cursor-not-allowed pointer-events-none"
+                )}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              {/* Right arrow */}
+              <button
+                onClick={scrollNext}
+                disabled={!canScrollNext}
+                aria-label="Slide suivant"
+                className={cn(
+                  "absolute right-0 top-1/2 -translate-y-1/2 z-10",
+                  "w-9 h-9 rounded-full flex items-center justify-center",
+                  "transition-all duration-200 ease-out",
+                  "border backdrop-blur-sm shadow-lg",
+                  canScrollNext
+                    ? "bg-black/40 hover:bg-orange/80 border-white/10 hover:border-orange text-white/80 hover:text-white active:scale-90 cursor-pointer"
+                    : "bg-black/20 border-transparent text-white/10 cursor-not-allowed pointer-events-none"
+                )}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
+          )}
         </div>
 
-        {/* Navigation arrows + counter */}
-        {scrollSnaps.length > 1 && (
-          <div className="flex items-center justify-between mt-5 px-1">
-            {/* Left arrow */}
-            <button
-              onClick={scrollPrev}
-              disabled={!canScrollPrev}
-              aria-label="Slide précédent"
-              className={cn(
-                "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 border",
-                canScrollPrev
-                  ? "bg-white/5 hover:bg-orange/10 border-white/10 hover:border-orange/25 text-white/70 hover:text-orange active:scale-95"
-                  : "bg-transparent border-transparent text-white/15 cursor-not-allowed"
-              )}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-
-            {/* Slide counter */}
-            <span className="text-xs text-muted-foreground/60 font-medium tabular-nums">
-              {selectedIndex + 1} <span className="text-white/20">/</span> {scrollSnaps.length}
+        {/* Slide counter – below carousel */}
+        {projectPairs.length > 1 && (
+          <div className="flex justify-center mt-4">
+            <span className="text-[11px] text-muted-foreground/50 font-medium tabular-nums tracking-wide">
+              {selectedIndex + 1}{" "}<span className="text-white/15">/</span>{" "}{scrollSnaps.length || projectPairs.length}
             </span>
-
-            {/* Right arrow */}
-            <button
-              onClick={scrollNext}
-              disabled={!canScrollNext}
-              aria-label="Slide suivant"
-              className={cn(
-                "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 border",
-                canScrollNext
-                  ? "bg-white/5 hover:bg-orange/10 border-white/10 hover:border-orange/25 text-white/70 hover:text-orange active:scale-95"
-                  : "bg-transparent border-transparent text-white/15 cursor-not-allowed"
-              )}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
           </div>
         )}
       </div>
