@@ -1,27 +1,12 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { ExternalLink, Github, Smartphone, Car, Bot, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const projects = [
-  {
-    title: "WEMA",
-    sub: "App Mobile Primée",
-    tags: ["Flutter", "Firebase"],
-    icon: Smartphone,
-    badge: { text: "Lauréat 2020", color: "orange" },
-    link: null,
-  },
-  {
-    title: "YAZZ",
-    sub: "IoT Véhicules",
-    tags: ["IoT", "Flutter", "GPS"],
-    icon: Car,
-    badge: { text: "En cours", color: "muted" },
-    link: null,
-  },
   {
     title: "AI Agent",
     sub: "Agent IA Autonome",
@@ -38,11 +23,140 @@ const projects = [
     badge: { text: "Live", color: "green" },
     link: "https://ggmarttesty.vercel.app/",
   },
+  {
+    title: "WEMA",
+    sub: "App Mobile Primée",
+    tags: ["Flutter", "Firebase"],
+    icon: Smartphone,
+    badge: { text: "Lauréat 2020", color: "orange" },
+    link: null,
+  },
+  {
+    title: "YAZZ",
+    sub: "IoT Véhicules",
+    tags: ["IoT", "Flutter", "GPS"],
+    icon: Car,
+    badge: { text: "En cours", color: "muted" },
+    link: null,
+  },
 ];
+
+/* Group projects by pairs for mobile carousel slides */
+const projectPairs: typeof projects[] = [];
+for (let i = 0; i < projects.length; i += 2) {
+  projectPairs.push(projects.slice(i, i + 2));
+}
+
+/* ── Single project card (reused in grid & carousel) ── */
+function ProjectCard({
+  project,
+  index,
+  isInView,
+}: {
+  project: (typeof projects)[number];
+  index: number;
+  isInView: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.35, delay: 0.08 + index * 0.08 }}
+      className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-orange/20 rounded-2xl p-4 sm:p-5 transition-all duration-200"
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-2.5 sm:mb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange/80 to-orange-400/80 flex items-center justify-center shadow-lg shadow-orange/10">
+            <project.icon className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="font-heading text-base font-bold text-white leading-tight">
+              {project.title}
+            </h3>
+            <p className="text-muted-foreground text-xs mt-0.5">{project.sub}</p>
+          </div>
+        </div>
+        <span
+          className={cn(
+            "px-2 py-0.5 rounded-full text-[10px] font-medium border flex-shrink-0",
+            project.badge.color === "orange" &&
+              "bg-orange/10 border-orange/25 text-orange",
+            project.badge.color === "green" &&
+              "bg-green-500/10 border-green-500/25 text-green-400",
+            project.badge.color === "muted" &&
+              "bg-white/[0.03] border-white/[0.08] text-muted-foreground"
+          )}
+        >
+          {project.badge.text}
+        </span>
+      </div>
+
+      {/* Tags + link */}
+      <div className="flex items-center justify-between">
+        <div className="flex flex-wrap gap-1.5">
+          {project.tags.map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-0.5 bg-white/[0.04] rounded text-[10px] text-muted-foreground"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+        {project.link && (
+          <a
+            href={project.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-orange hover:text-orange-400 text-xs font-medium transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 export default function ProjectsPanel() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
+
+  /* ── Carousel (mobile/tablet only) ── */
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+    slidesToScroll: 1,
+  });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const scrollTo = useCallback(
+    (index: number) => emblaApi?.scrollTo(index),
+    [emblaApi]
+  );
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedSnapIndex());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const updateState = () => {
+      setScrollSnaps(emblaApi.scrollSnapList());
+      setSelectedIndex(emblaApi.selectedSnapIndex());
+    };
+    emblaApi.on("init", updateState);
+    emblaApi.on("reInit", updateState);
+    emblaApi.on("select", updateState);
+    return () => {
+      emblaApi.off("init", updateState);
+      emblaApi.off("reInit", updateState);
+      emblaApi.off("select", updateState);
+    };
+  }, [emblaApi]);
 
   return (
     <div ref={ref} className="py-8 sm:py-12">
@@ -61,68 +175,59 @@ export default function ProjectsPanel() {
         </p>
       </motion.div>
 
-      {/* Project grid */}
-      <div className="grid sm:grid-cols-2 gap-3 mb-8">
-        {projects.map((project, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 16 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.35, delay: 0.08 + i * 0.08 }}
-            className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-orange/20 rounded-2xl p-4 sm:p-5 transition-all duration-200"
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between mb-2.5 sm:mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange/80 to-orange-400/80 flex items-center justify-center shadow-lg shadow-orange/10">
-                  <project.icon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-heading text-base font-bold text-white leading-tight">
-                    {project.title}
-                  </h3>
-                  <p className="text-muted-foreground text-xs mt-0.5">{project.sub}</p>
-                </div>
-              </div>
-              <span
-                className={cn(
-                  "px-2 py-0.5 rounded-full text-[10px] font-medium border flex-shrink-0",
-                  project.badge.color === "orange" &&
-                    "bg-orange/10 border-orange/25 text-orange",
-                  project.badge.color === "green" &&
-                    "bg-green-500/10 border-green-500/25 text-green-400",
-                  project.badge.color === "muted" &&
-                    "bg-white/[0.03] border-white/[0.08] text-muted-foreground"
-                )}
+      {/* ── Mobile/tablet: carousel (2 per slide) ── */}
+      <div className="md:hidden mb-6">
+        <div ref={emblaRef} className="overflow-hidden">
+          <div className="flex gap-3">
+            {projectPairs.map((pair, slideIdx) => (
+              <div
+                key={slideIdx}
+                className="flex-[0_0_100%] min-w-0 pl-0"
               >
-                {project.badge.text}
-              </span>
-            </div>
-
-            {/* Tags + link */}
-            <div className="flex items-center justify-between">
-              <div className="flex flex-wrap gap-1.5">
-                {project.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-0.5 bg-white/[0.04] rounded text-[10px] text-muted-foreground"
-                  >
-                    {tag}
-                  </span>
-                ))}
+                <div className="grid grid-cols-2 gap-3">
+                  {pair.map((project, cardIdx) => (
+                    <ProjectCard
+                      key={project.title}
+                      project={project}
+                      index={slideIdx * 2 + cardIdx}
+                      isInView={isInView}
+                    />
+                  ))}
+                </div>
               </div>
-              {project.link && (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-orange hover:text-orange-400 text-xs font-medium transition-colors"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              )}
-            </div>
-          </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Dots indicator */}
+        {scrollSnaps.length > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-5">
+            {scrollSnaps.map((_, dotIdx) => (
+              <button
+                key={dotIdx}
+                onClick={() => scrollTo(dotIdx)}
+                aria-label={`Slide ${dotIdx + 1}`}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-300",
+                  selectedIndex === dotIdx
+                    ? "w-6 bg-orange"
+                    : "w-1.5 bg-white/20 hover:bg-white/30"
+                )}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Desktop: grid (unchanged) ── */}
+      <div className="hidden md:grid grid-cols-2 gap-3 mb-8">
+        {projects.map((project, i) => (
+          <ProjectCard
+            key={project.title}
+            project={project}
+            index={i}
+            isInView={isInView}
+          />
         ))}
       </div>
 

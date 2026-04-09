@@ -78,7 +78,16 @@ export default function Portfolio() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                const el = document.getElementById("portfolio");
+                if (el) {
+                  const rect = el.getBoundingClientRect();
+                  if (rect.top > 80) {
+                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }
+              }}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-[3.5rem]",
                 activeTab === tab.id
