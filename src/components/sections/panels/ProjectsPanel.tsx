@@ -3,7 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ExternalLink, Github, Smartphone, Car, Bot, ShoppingCart } from "lucide-react";
+import { ExternalLink, Github, Smartphone, Car, Bot, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const projects = [
@@ -142,11 +142,19 @@ export default function ProjectsPanel() {
     setSelectedIndex(emblaApi.selectedSnapIndex());
   }, [emblaApi]);
 
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
   useEffect(() => {
     if (!emblaApi) return;
     const updateState = () => {
       setScrollSnaps(emblaApi.scrollSnapList());
       setSelectedIndex(emblaApi.selectedSnapIndex());
+      setCanScrollPrev(emblaApi.canScrollPrev());
+      setCanScrollNext(emblaApi.canScrollNext());
     };
     emblaApi.on("init", updateState);
     emblaApi.on("reInit", updateState);
@@ -175,7 +183,7 @@ export default function ProjectsPanel() {
         </p>
       </motion.div>
 
-      {/* ── Mobile/tablet: carousel (2 per slide) ── */}
+      {/* ── Mobile/tablet: carousel (2 per slide, stacked vertically) ── */}
       <div className="md:hidden mb-6">
         <div ref={emblaRef} className="overflow-hidden">
           <div className="flex gap-3">
@@ -184,7 +192,7 @@ export default function ProjectsPanel() {
                 key={slideIdx}
                 className="flex-[0_0_100%] min-w-0 pl-0"
               >
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-3">
                   {pair.map((project, cardIdx) => (
                     <ProjectCard
                       key={project.title}
@@ -199,22 +207,43 @@ export default function ProjectsPanel() {
           </div>
         </div>
 
-        {/* Dots indicator */}
+        {/* Navigation arrows + counter */}
         {scrollSnaps.length > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-5">
-            {scrollSnaps.map((_, dotIdx) => (
-              <button
-                key={dotIdx}
-                onClick={() => scrollTo(dotIdx)}
-                aria-label={`Slide ${dotIdx + 1}`}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  selectedIndex === dotIdx
-                    ? "w-6 bg-orange"
-                    : "w-1.5 bg-white/20 hover:bg-white/30"
-                )}
-              />
-            ))}
+          <div className="flex items-center justify-between mt-5 px-1">
+            {/* Left arrow */}
+            <button
+              onClick={scrollPrev}
+              disabled={!canScrollPrev}
+              aria-label="Slide précédent"
+              className={cn(
+                "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 border",
+                canScrollPrev
+                  ? "bg-white/5 hover:bg-orange/10 border-white/10 hover:border-orange/25 text-white/70 hover:text-orange active:scale-95"
+                  : "bg-transparent border-transparent text-white/15 cursor-not-allowed"
+              )}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {/* Slide counter */}
+            <span className="text-xs text-muted-foreground/60 font-medium tabular-nums">
+              {selectedIndex + 1} <span className="text-white/20">/</span> {scrollSnaps.length}
+            </span>
+
+            {/* Right arrow */}
+            <button
+              onClick={scrollNext}
+              disabled={!canScrollNext}
+              aria-label="Slide suivant"
+              className={cn(
+                "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 border",
+                canScrollNext
+                  ? "bg-white/5 hover:bg-orange/10 border-white/10 hover:border-orange/25 text-white/70 hover:text-orange active:scale-95"
+                  : "bg-transparent border-transparent text-white/15 cursor-not-allowed"
+              )}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         )}
       </div>
