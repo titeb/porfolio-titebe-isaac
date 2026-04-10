@@ -139,7 +139,7 @@ export default function ProjectsPanel() {
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedSnapIndex());
+    setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -152,7 +152,7 @@ export default function ProjectsPanel() {
     if (!emblaApi) return;
     const updateState = () => {
       setScrollSnaps(emblaApi.scrollSnapList());
-      setSelectedIndex(emblaApi.selectedSnapIndex());
+      setSelectedIndex(emblaApi.selectedScrollSnap());
       setCanScrollPrev(emblaApi.canScrollPrev());
       setCanScrollNext(emblaApi.canScrollNext());
     };
