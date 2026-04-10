@@ -186,9 +186,9 @@ export default function ProjectsPanel() {
       {/* ── Mobile/tablet: carousel (2 per slide, stacked vertically) ── */}
       <div className="md:hidden mb-6">
         <div className="relative">
-          {/* Carousel container */}
-          <div ref={emblaRef} className="overflow-visible">
-            <div className="flex gap-3 overflow-hidden">
+          {/* Carousel container – overflow-hidden is REQUIRED by Embla */}
+          <div ref={emblaRef} className="overflow-hidden">
+            <div className="flex gap-3">
               {projectPairs.map((pair, slideIdx) => (
                 <div
                   key={slideIdx}
@@ -218,12 +218,12 @@ export default function ProjectsPanel() {
                 disabled={!canScrollPrev}
                 aria-label="Slide précédent"
                 className={cn(
-                  "absolute left-0 top-1/2 -translate-y-1/2 z-10",
+                  "absolute left-1 top-1/2 -translate-y-1/2 z-20",
                   "w-9 h-9 rounded-full flex items-center justify-center",
                   "transition-all duration-200 ease-out",
                   "border backdrop-blur-sm shadow-lg",
                   canScrollPrev
-                    ? "bg-black/40 hover:bg-orange/80 border-white/10 hover:border-orange text-white/80 hover:text-white active:scale-90 cursor-pointer"
+                    ? "bg-black/50 hover:bg-orange border-white/15 hover:border-orange text-white/80 hover:text-white active:scale-90 cursor-pointer"
                     : "bg-black/20 border-transparent text-white/10 cursor-not-allowed pointer-events-none"
                 )}
               >
@@ -236,12 +236,12 @@ export default function ProjectsPanel() {
                 disabled={!canScrollNext}
                 aria-label="Slide suivant"
                 className={cn(
-                  "absolute right-0 top-1/2 -translate-y-1/2 z-10",
+                  "absolute right-1 top-1/2 -translate-y-1/2 z-20",
                   "w-9 h-9 rounded-full flex items-center justify-center",
                   "transition-all duration-200 ease-out",
                   "border backdrop-blur-sm shadow-lg",
                   canScrollNext
-                    ? "bg-black/40 hover:bg-orange/80 border-white/10 hover:border-orange text-white/80 hover:text-white active:scale-90 cursor-pointer"
+                    ? "bg-black/50 hover:bg-orange border-white/15 hover:border-orange text-white/80 hover:text-white active:scale-90 cursor-pointer"
                     : "bg-black/20 border-transparent text-white/10 cursor-not-allowed pointer-events-none"
                 )}
               >
