@@ -156,6 +156,8 @@ export default function ProjectsPanel() {
       setCanScrollPrev(emblaApi.canScrollPrev());
       setCanScrollNext(emblaApi.canScrollNext());
     };
+    // Call immediately — "init" may have already fired before this effect runs
+    updateState();
     emblaApi.on("init", updateState);
     emblaApi.on("reInit", updateState);
     emblaApi.on("select", updateState);
