@@ -126,7 +126,7 @@ export default function ProjectsPanel() {
   /* ── Carousel (mobile/tablet only) ── */
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
-    containScroll: "trimSnaps",
+    containScroll: "keepSnaps",
     slidesToScroll: 1,
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -225,8 +225,8 @@ export default function ProjectsPanel() {
                   "transition-all duration-200 ease-out",
                   "border backdrop-blur-sm shadow-lg",
                   canScrollPrev
-                    ? "bg-black/50 hover:bg-orange border-white/15 hover:border-orange text-white/80 hover:text-white active:scale-90 cursor-pointer"
-                    : "bg-black/20 border-transparent text-white/10 cursor-not-allowed pointer-events-none"
+                    ? "bg-black/50 hover:bg-orange border-white/15 hover:border-orange text-white/80 hover:text-white active:scale-90"
+                    : "bg-black/20 border-transparent text-white/20 opacity-50 cursor-default"
                 )}
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -243,8 +243,8 @@ export default function ProjectsPanel() {
                   "transition-all duration-200 ease-out",
                   "border backdrop-blur-sm shadow-lg",
                   canScrollNext
-                    ? "bg-black/50 hover:bg-orange border-white/15 hover:border-orange text-white/80 hover:text-white active:scale-90 cursor-pointer"
-                    : "bg-black/20 border-transparent text-white/10 cursor-not-allowed pointer-events-none"
+                    ? "bg-black/50 hover:bg-orange border-white/15 hover:border-orange text-white/80 hover:text-white active:scale-90"
+                    : "bg-black/20 border-transparent text-white/20 opacity-50 cursor-default"
                 )}
               >
                 <ChevronRight className="w-5 h-5" />
